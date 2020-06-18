@@ -7,10 +7,13 @@ import datetime
 import logging
 
 from django.conf import settings
+
 from django.utils.timezone import now
+
 from six import text_type
 
 from lms.djangoapps.verify_student.tasks import send_request_to_ss_for_user
+
 
 log = logging.getLogger(__name__)
 
@@ -161,3 +164,5 @@ def can_verify_now(verification_status, expiration_datetime):
             and is_verification_expiring_soon(expiration_datetime)
         )
     )
+
+
