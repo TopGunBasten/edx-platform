@@ -37,6 +37,7 @@ class RenderForm extends React.Component {
         subject: '',
         message: '',
       },
+      submitButton: null,
     };
     this.formValidationErrors = {
       course: gettext('Select a course or select "Not specific to a course" for your support request.'),
@@ -107,12 +108,13 @@ class RenderForm extends React.Component {
     window.location.href = this.courseDiscussionURL.replace('{course_id}', formData.course);
   }
 
-  submitForm(event) {
-    event.preventDefault();
+  submitForm(submitButton) {
+    this.setState({submitButton: submitButton});
     const formData = this.getFormDataFromState();
     this.clearErrorState();
     this.validateFormData(formData);
     if (this.formHasErrors()) {
+      submitButton.removeAttribute("disabled");
       return this.scrollToTop();
     }
     this.createZendeskTicket(formData);
@@ -141,15 +143,19 @@ class RenderForm extends React.Component {
     request.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
     request.send(JSON.stringify(data));
     request.onreadystatechange = function success() {
-      if (request.readyState === 4 && request.status === 201) {
-        this.setState({
-          success: true,
-        });
+      if (request.readyState === 4) {
+        this.state.submitButton.removeAttribute("disabled");
+        if (request.status === 201) {
+            this.setState({
+                success: true,
+            });
+        }
       }
     }.bind(this);
 
     request.onerror = function error() {
       this.updateErrorInState('request', this.formValidationErrors.request);
+      this.state.submitButton.removeAttribute("disabled");
       this.scrollToTop();
     }.bind(this);
   }
